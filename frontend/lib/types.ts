@@ -15,7 +15,10 @@ export const ROLE_LABELS: Record<Role, string> = {
 
 export const ROLE_OPTIONS: { value: Role; label: string }[] = (
   Object.keys(ROLE_LABELS) as Role[]
-).map((value) => ({ value, label: ROLE_LABELS[value] }));
+).map((value) => ({
+  value,
+  label: ROLE_LABELS[value],
+}));
 
 export interface UserOut {
   id: string;
@@ -24,6 +27,7 @@ export interface UserOut {
   last_name: string;
   role: Role;
   is_active: boolean;
+  must_change_password?: boolean;
   created_at: string;
 }
 
@@ -50,9 +54,42 @@ export interface Mission {
   created_by: string;
   created_at: string;
   progress: number;
+  // Absent en temps normal. Présent uniquement si la mission a
+  // bien été créée/modifiée mais que la synchronisation Google
+  // Drive qui suit a échoué (panne réseau transitoire).
+  drive_sync_warning?: string | null;
 }
 
 export type DocumentCategory = 'recus' | 'travaux';
+
+export interface GuideTemplate {
+  id: string;
+  node_id: string;
+  filename: string;
+  content_type: string | null;
+  size: number | null;
+  uploaded_by: string | null;
+  uploaded_at: string | null;
+  download_url?: string | null;
+}
+
+export interface GuideFile {
+  id?: string;
+  label: string;
+  url: string;
+  download_url?: string;
+  content_type?: string | null;
+  size?: number | null;
+}
+
+export interface MissionMember {
+  id: string;
+  email: string;
+  first_name: string;
+  last_name: string;
+  role: Role;
+  is_active?: boolean;
+}
 
 export interface DocumentItem {
   id: string;
@@ -65,6 +102,7 @@ export interface DocumentItem {
   size: number | null;
   uploaded_by: string | null;
   uploaded_at: string | null;
+  drive_web_url?: string | null;
 }
 
 export type QuestionType =
@@ -78,7 +116,8 @@ export type QuestionType =
   | 'table'
   | 'checkbox_list'
   | 'collecte'
-  | 'file';
+  | 'file'
+  | 'label';
 
 export interface ConditionRef {
   questionId: string;
@@ -89,10 +128,22 @@ export interface QuestionDef {
   id: string;
   label: string;
   type: QuestionType;
+
   options?: string[];
+
   columns?: string[];
+
   withNA?: boolean;
+
   conditionalOn?: ConditionRef | ConditionRef[];
+
+  guide_files?: GuideFile[];
+
+  rows?: number;
+
+  document_category?: 'recus' | 'travaux';
+
+  bold?: boolean;
 }
 
 export interface QuestionnaireNode {
@@ -100,6 +151,10 @@ export interface QuestionnaireNode {
   label: string;
   questions: QuestionDef[];
   children: QuestionnaireNode[];
+
+  layout?: 'structured' | 'standard';
+
+  summary?: 'conclusions';
 }
 
 export interface QuestionnaireStructure {

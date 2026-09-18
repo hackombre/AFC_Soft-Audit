@@ -21,7 +21,7 @@ interface MissionContextType {
   missions: Mission[];
   missionsForActiveEntity: Mission[];
   activeMission: Mission | null;
-  setActiveMissionId: (id: string) => void;
+  setActiveMissionId: (id: string | null) => void;
   loading: boolean;
   refreshMissions: () => Promise<void>;
 }
@@ -55,7 +55,7 @@ export function MissionProvider({ children }: { children: ReactNode }) {
         const stored =
           typeof window !== 'undefined' ? localStorage.getItem(ACTIVE_MISSION_KEY) : null;
         if (stored && list.some((m) => m.id === stored)) return stored;
-        return list[0]?.id ?? null;
+        return null;
       });
     } finally {
       setLoading(false);
@@ -66,9 +66,14 @@ export function MissionProvider({ children }: { children: ReactNode }) {
     if (currentUser) {
       refreshEntities();
       refreshMissions();
-      const storedEntity =
-        typeof window !== 'undefined' ? localStorage.getItem(ACTIVE_ENTITY_KEY) : null;
-      if (storedEntity) setActiveEntityIdState(storedEntity);
+      // Chaque nouvelle authentification repart sur le choix d'une entité,
+      // sans réouvrir automatiquement la dernière mission.
+      setActiveEntityIdState(null);
+      setActiveId(null);
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem(ACTIVE_ENTITY_KEY);
+        localStorage.removeItem(ACTIVE_MISSION_KEY);
+      }
     } else {
       setEntities([]);
       setMissions([]);
@@ -91,15 +96,21 @@ export function MissionProvider({ children }: { children: ReactNode }) {
 
   const setActiveEntityId = useCallback((id: string | null) => {
     setActiveEntityIdState(id);
+    // Une entité seule ne conserve aucune mission active.
+    setActiveId(null);
     if (typeof window !== 'undefined') {
       if (id) localStorage.setItem(ACTIVE_ENTITY_KEY, id);
       else localStorage.removeItem(ACTIVE_ENTITY_KEY);
+      localStorage.removeItem(ACTIVE_MISSION_KEY);
     }
   }, []);
 
-  const setActiveMissionId = useCallback((id: string) => {
+  const setActiveMissionId = useCallback((id: string | null) => {
     setActiveId(id);
-    if (typeof window !== 'undefined') localStorage.setItem(ACTIVE_MISSION_KEY, id);
+    if (typeof window !== 'undefined') {
+      if (id) localStorage.setItem(ACTIVE_MISSION_KEY, id);
+      else localStorage.removeItem(ACTIVE_MISSION_KEY);
+    }
   }, []);
 
   const activeEntity = entities.find((e) => e.id === activeEntityId) ?? null;

@@ -50,16 +50,29 @@ export default function MissionModal({ open, onClose }: { open: boolean; onClose
     }
     setSubmitting(true);
     try {
-      const mission = await api.createMission({
+      const mission = (await api.createMission({
         entity_id: activeEntity.id,
         name,
         closing_date: closingDate,
         member_ids: Array.from(selectedMembers),
-      });
+      })) as import('@/lib/types').Mission;
+
+      // La mission est créée dans tous les cas à ce stade — un
+      // échec ici ne concerne que la synchronisation Google
+      // Drive, pas la création elle-même. On ferme le
+      // formulaire normalement et on avertit séparément, plutôt
+      // que de laisser croire à un échec (qui pousserait à
+      // recliquer sur « Créer » et dupliquer la mission).
       await refreshMissions();
-      setActiveMissionId((mission as { id: string }).id);
+      setActiveMissionId(mission.id);
       reset();
       onClose();
+
+      if (mission.drive_sync_warning) {
+        window.alert(
+          `Mission créée. ${mission.drive_sync_warning}`
+        );
+      }
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Impossible de créer la mission.');
     } finally {
@@ -108,15 +121,16 @@ export default function MissionModal({ open, onClose }: { open: boolean; onClose
               <p className="px-3.5 py-3 text-sm" style={{ color: '#94a3b8' }}>Aucun utilisateur pour le moment.</p>
             )}
             {users.map((u) => (
-              <label key={u.id} className="flex items-center gap-3 px-3.5 py-2.5 text-sm cursor-pointer" style={{ color: '#0f172a' }}>
+              <label key={u.id} className="flex items-center gap-3 px-3.5 py-2.5 text-sm" style={{ color: '#0f172a', opacity: u.role === 'associe' ? 0.65 : 1 }}>
                 <input
                   type="checkbox"
-                  checked={selectedMembers.has(u.id)}
+                  disabled={u.role === 'associe'}
+                  checked={u.role === 'associe' || selectedMembers.has(u.id)}
                   onChange={() => toggleMember(u.id)}
                   className="accent-blue-600"
                 />
-                <span className="flex-1">{u.first_name} {u.last_name}</span>
-                <span className="text-xs" style={{ color: '#94a3b8' }}>{ROLE_LABELS[u.role]}</span>
+                <span className="flex-1 min-w-0"><b>{u.first_name} {u.last_name}</b><span className="block text-xs truncate" style={{ color: '#64748b' }}>{u.email}</span></span>
+                <span className="text-xs shrink-0" style={{ color: '#94a3b8' }}>{u.role === 'associe' ? 'Accès obligatoire' : ROLE_LABELS[u.role]}</span>
               </label>
             ))}
           </div>

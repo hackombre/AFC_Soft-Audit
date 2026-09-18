@@ -49,42 +49,45 @@ export default function TopBar() {
       style={{ height: '72px', background: 'white', borderBottom: '1px solid #eef2f7', gridTemplateColumns: '1fr auto 1fr' }}
     >
       <Link href="/missions" className="flex items-center shrink-0">
-        <Logo className="h-11 w-auto" />
+        <Logo className="h-14 w-auto" />
       </Link>
 
       <div className="flex items-center justify-center">
-        {activeMission && (
-          <div className="hidden md:flex items-center gap-6 px-6" style={{ borderLeft: '1px solid #eef2f7', borderRight: '1px solid #eef2f7' }}>
-            {activeEntity && (
-              <div className="text-center">
-                <p className="text-[11px] font-semibold uppercase tracking-wide" style={{ color: '#94a3b8' }}>Entité</p>
-                <p className="text-base font-semibold" style={{ color: '#0f172a' }}>{activeEntity.name}</p>
-              </div>
+        {activeEntity && (
+          <div
+            className="text-center px-8"
+            style={{ borderLeft: '1px solid #eef2f7', borderRight: '1px solid #eef2f7' }}
+          >
+            <p className="text-[11px] font-semibold uppercase tracking-wide" style={{ color: '#94a3b8' }}>
+              Entité
+            </p>
+            <p className="text-lg font-bold tracking-wide" style={{ color: '#0f172a' }}>
+              {activeEntity.sigle || activeEntity.name}
+            </p>
+            {activeMission && (
+              <p className="text-sm font-semibold mt-0.5" style={{ color: '#2563eb' }}>
+                {activeMission.name}
+              </p>
             )}
-            <div className="text-center">
-              <p className="text-[11px] font-semibold uppercase tracking-wide" style={{ color: '#94a3b8' }}>Mission</p>
-              <p className="text-base font-semibold" style={{ color: '#0f172a' }}>{activeMission.name}</p>
-            </div>
-            <div className="text-center">
-              <p className="text-[11px] font-semibold uppercase tracking-wide" style={{ color: '#94a3b8' }}>Clôture</p>
-              <p className="text-base font-medium" style={{ color: '#334155' }}>{formatDate(activeMission.closing_date)}</p>
-            </div>
           </div>
         )}
       </div>
 
       <div className="flex items-center justify-end gap-6">
         <nav className="flex items-center gap-1">
-          <IconButton href="/documentation" active={pathname?.startsWith('/documentation') ?? false} label="Documentation">
-            <svg width="19" height="19" viewBox="0 0 18 18" fill="none">
-              <path d="M4.5 2.5h6l3.5 3.5v9a1 1 0 01-1 1h-8.5a1 1 0 01-1-1v-11.5a1 1 0 011-1zm6 0v3.5h3.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </IconButton>
           {isAssociate && (
             <IconButton href="/utilisateurs" active={pathname?.startsWith('/utilisateurs') ?? false} label="Utilisateurs">
               <svg width="19" height="19" viewBox="0 0 18 18" fill="none">
                 <circle cx="9" cy="6.5" r="2.5" stroke="currentColor" strokeWidth="1.4" />
                 <path d="M3.5 15c0-2.8 2.5-4.5 5.5-4.5s5.5 1.7 5.5 4.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+              </svg>
+            </IconButton>
+          )}
+          {isAssociate && (
+            <IconButton href="/modeles-guides" active={pathname?.startsWith('/modeles-guides') ?? false} label="Modèles">
+              <svg width="19" height="19" viewBox="0 0 18 18" fill="none">
+                <path d="M5 2.8h5l3 3v8.4a1 1 0 01-1 1H5a1 1 0 01-1-1v-10.4a1 1 0 011-1z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
+                <path d="M10 2.8v3h3M6.5 9h5M6.5 12h5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
               </svg>
             </IconButton>
           )}
@@ -98,7 +101,7 @@ export default function TopBar() {
           >
             <div className="text-right hidden sm:block">
               <p className="text-base font-semibold leading-tight" style={{ color: '#0f172a' }}>
-                Bonjour, {currentUser?.first_name}
+                {currentUser?.first_name} {currentUser?.last_name}
               </p>
             </div>
             <div

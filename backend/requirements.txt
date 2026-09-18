@@ -2,7 +2,20 @@ fastapi==0.115.0
 uvicorn[standard]==0.30.6
 sqlalchemy==2.0.35
 pydantic[email]==2.13.5
-python-jose[cryptography]==3.3.0
+# JWT : PyJWT remplace python-jose (peu maintenu, CVE historiques
+# de confusion d'algorithme).
+PyJWT==2.9.0
 passlib[bcrypt]==1.7.4
 bcrypt==4.0.1
 python-multipart==0.0.9
+
+psycopg2-binary==2.9.11
+
+# ============================================================
+# GOOGLE DRIVE + GMAIL API — OAuth 2.0
+# ============================================================
+
+google-api-python-client
+google-auth
+google-auth-oauthlib
+google-auth-httplib2

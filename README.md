@@ -4,7 +4,7 @@ Plateforme web de gestion de missions d'audit : questionnaire d'audit complet
 (397 questions, extrait de `questionnaire_AFCsoft.docx`), gestion des
 utilisateurs et des rôles, gestion de missions.
 
-- **Backend** : FastAPI + SQLAlchemy (SQLite par défaut)
+- **Backend** : FastAPI + SQLAlchemy + PostgreSQL Supabase
 - **Frontend** : Next.js 14 (App Router) + TypeScript + Tailwind CSS
 
 ## Rôles
@@ -20,7 +20,7 @@ Un associé ou un directeur de mission peut créer une mission.
 La barre latérale n'affiche que la **liste des missions créées** (recherche +
 filtre par date de clôture). On consulte une mission en cliquant dessus : la
 structure d'audit et le questionnaire s'affichent alors à côté. La barre du
-haut donne accès à **Documentation** et, pour l'associé, **Utilisateurs**.
+haut donne accès, pour l'associé, à **Utilisateurs** et **Modèles**. Le module **Modèles** permet de rattacher plusieurs modèles de guides éditables à chaque sous-étape/sous-sous-étape disposant d'une zone « Guide ». Les fichiers sont stockés dans le Shared Drive Google Workspace et leurs métadonnées dans PostgreSQL : aucun modèle de guide n'est conservé dans le code source.
 
 ## Démarrage rapide
 
@@ -42,7 +42,7 @@ uvicorn app.main:app --reload --port 8000
 Au tout premier démarrage, un compte **Associé** est créé automatiquement :
 
 ```
-email        : associe@afcsoft.com
+email        : associe@afc-audit.com
 mot de passe : Afcsoft2024!
 ```
 
@@ -85,6 +85,79 @@ l'entité ». Le tableau de répartition du capital calcule aussi
 automatiquement la colonne Capital (Nombre de titres × Nominal) et signale
 un écart si la somme ne correspond pas au capital saisi.
 
+## Sécurité
+
+Le domaine professionnel autorisé est **@afc-audit.com**. Après chaque nouvelle
+authentification, le code de sécurité est demandé avant l'accès aux entités.
+Le code est stocké uniquement sous forme hachée.
+
+Si l'utilisateur oublie son code, il clique sur **Code oublié ?**, renseigne son
+email professionnel et son mot de passe dans la fenêtre de vérification. Un
+nouveau code est alors généré et envoyé par email ; il est demandé immédiatement
+après son renouvellement.
+
+Lorsqu'un associé crée un utilisateur, un mot de passe provisoire est généré
+automatiquement et envoyé par email avec les informations de connexion.
+L'utilisateur doit obligatoirement choisir un nouveau mot de passe avant de
+poursuivre.
+
+## PostgreSQL Supabase et Google Drive partagé
+
+### PostgreSQL
+
+La production utilise **exclusivement PostgreSQL hébergé par Supabase**. Le
+backend refuse de démarrer si `DATABASE_URL` n'est pas une URL PostgreSQL.
+
+Dans `backend/.env` :
+
+```env
+DATABASE_URL=postgresql+psycopg2://postgres:mot_de_passe@hote-supabase:5432/postgres?sslmode=require
+```
+
+Utilisez exactement la chaîne fournie par **Supabase → Connect**. Les tables
+sont créées/complétées automatiquement au démarrage.
+
+### Google Drive partagé
+
+Les documents sont envoyés directement dans le Shared Drive Google Workspace du cabinet.
+Ils sont envoyés directement dans le **Shared Drive Google Workspace du
+cabinet**, dans une arborescence de type :
+
+```text
+AFC Soft Audit/
+  SIGLE_ENTITE/
+    MISSION/
+      Documents reçus/
+        node_id/
+      Travaux effectués/
+        node_id/
+```
+
+Le compte de service Google utilisé par l'API doit être ajouté au Shared Drive
+avec des droits permettant de créer, modifier et supprimer des fichiers.
+
+Variables requises :
+
+```env
+GOOGLE_SERVICE_ACCOUNT_JSON={"type":"service_account",...}
+GOOGLE_SHARED_DRIVE_ID=xxxxxxxxxxxxxxxxxxxx
+```
+
+Les fichiers sont indexés dans PostgreSQL avec leur identifiant Google Drive,
+ce qui permet de les télécharger ou supprimer depuis l'application.
+
+### Email
+
+Configurez un compte d'envoi du cabinet, par exemple Google Workspace :
+
+```env
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=notifications@afc-audit.com
+SMTP_PASSWORD=mot_de_passe_application
+SMTP_FROM=notifications@afc-audit.com
+```
+
 ## Documents classés par étape/sous-étape
 
 La page **Documents** permet d'importer des fichiers et de les classer dans
@@ -93,9 +166,7 @@ comme un explorateur de fichiers : on choisit un dossier (une étape) dans
 l'arbre à gauche, puis on glisse-dépose ou importe les fichiers qui y seront
 rattachés. Chaque dossier affiche le nombre de fichiers qu'il contient.
 
-Côté backend, les fichiers sont stockés sur disque sous
-`backend/uploads/<mission_id>/<node_id>/` et indexés en base (table
-`documents`) avec le fichier, la taille, qui l'a importé et quand.
+Côté backend, seuls les métadonnées et l'identifiant Google Drive sont stockés dans PostgreSQL ; le fichier lui-même reste dans le Shared Drive du cabinet.
 
 ## Création d'une mission
 
@@ -168,7 +239,7 @@ backend/
     models.py                → modèles SQLAlchemy (User, Mission, Answer…)
     schemas.py                → schémas Pydantic
     auth.py                   → JWT, hachage des mots de passe
-    database.py                → configuration SQLite/PostgreSQL
+    database.py                → configuration PostgreSQL Supabase
     questionnaire_utils.py     → utilitaires (aplatissement, comptage)
     data/
       questionnaire_data.py    → LE QUESTIONNAIRE (source unique éditable)
@@ -205,3 +276,6 @@ frontend/
   PostgreSQL en production, et `SECRET_KEY`.
 - **Frontend** : Vercel (recommandé pour Next.js) ou tout hébergeur Node.
   Définissez `NEXT_PUBLIC_API_URL` vers l'URL du backend déployé.
+## Mot de passe oublié
+
+La page de connexion propose « Mot de passe oublié ? ». Le flux est : adresse email professionnelle → code de sécurité envoyé par email → validation du code → nouveau mot de passe et confirmation → ouverture de session. Le code de récupération expire après 15 minutes.

@@ -26,7 +26,7 @@ export default function QuestionnaireTree({
     <div>
       {nodes.map((node) => {
         const hasChildren = node.children.length > 0;
-        const isNavigable = node.questions.length > 0;
+        const isNavigable = node.questions.length > 0 || node.summary === 'conclusions';
         const isActive = node.id === activeId;
         const isExpanded = expanded.has(node.id);
         const progress = subtreeProgress(node, answers);

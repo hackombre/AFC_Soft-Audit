@@ -1,45 +1,175 @@
-# Python
-__pycache__/
-*.py[cod]
-*.pyo
-.venv/
-venv/
-env/
+# =========================================================
+# AFC SOFT AUDIT - .gitignore
+# =========================================================
 
-# Environment
+# ---------------------------------------------------------
+# ENVIRONNEMENT / SECRETS
+# ---------------------------------------------------------
 .env
 .env.*
 !.env.example
+!.env.production.example
+!.env.development.example
 
-# Node
+# Clés et certificats
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+*.cer
+
+# ---------------------------------------------------------
+# PYTHON / FASTAPI - BACKEND
+# ---------------------------------------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environnements virtuels
+.venv/
+venv/
+env/
+ENV/
+
+# Python packaging
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Tests / couverture
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+
+# Mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Ruff
+.ruff_cache/
+
+# ---------------------------------------------------------
+# DATABASE LOCALE
+# ---------------------------------------------------------
+*.db
+*.sqlite
+*.sqlite3
+*.sqlite-shm
+*.sqlite-wal
+
+# ---------------------------------------------------------
+# FICHIERS UPLOADÉS / STOCKAGE LOCAL
+# ---------------------------------------------------------
+uploads/
+storage/
+media/
+tmp/
+temp/
+
+# Documents générés localement
+*.docx
+*.xlsx
+*.xls
+*.pdf
+
+# ---------------------------------------------------------
+# NEXT.JS / NODE.JS - FRONTEND
+# ---------------------------------------------------------
 node_modules/
 .next/
 out/
 dist/
-build/
+.turbo/
 
-# Logs
-*.log
+# Logs npm / yarn / pnpm
 npm-debug.log*
 yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
 
-# IDE
-.vscode/
+# Cache
+.npm/
+.yarn/
+.pnpm-store/
+
+# ---------------------------------------------------------
+# TYPESCRIPT
+# ---------------------------------------------------------
+*.tsbuildinfo
+
+# ---------------------------------------------------------
+# IDE / EDITEURS
+# ---------------------------------------------------------
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+!.vscode/tasks.json
+!.vscode/launch.json
+
 .idea/
+*.iml
 
-# OS
-.DS_Store
+# ---------------------------------------------------------
+# SYSTEME WINDOWS / MAC / LINUX
+# ---------------------------------------------------------
 Thumbs.db
+ehthumbs.db
+Desktop.ini
 
-# Database / local data
-*.db
-*.sqlite
-*.sqlite3
+.DS_Store
 
-# Uploads / generated files
-uploads/
-storage/
+# ---------------------------------------------------------
+# LOGS
+# ---------------------------------------------------------
+*.log
+logs/
 
-# Secrets
-*.pem
-*.key
+# ---------------------------------------------------------
+# FICHIERS TEMPORAIRES
+# ---------------------------------------------------------
+*.tmp
+*.temp
+*.bak
+*.swp
+*.swo
+*~
+
+# ---------------------------------------------------------
+# RAPPORTS / EXPORTS TEMPORAIRES
+# ---------------------------------------------------------
+reports/
+exports/
+generated/
+generated_reports/
+
+# ---------------------------------------------------------
+# CACHE GENERAL
+# ---------------------------------------------------------
+.cache/
+.cache-loader/
+
+# ---------------------------------------------------------
+# FICHIERS DE CONFIGURATION LOCALE
+# ---------------------------------------------------------
+*.local
+config.local.*
+settings.local.*
+
+# ---------------------------------------------------------
+# OS / OUTILS
+# ---------------------------------------------------------
+.python-version
+.node-version
+
+# ---------------------------------------------------------
+# FICHIERS DE DEPLOIEMENT LOCAUX
+# ---------------------------------------------------------
+*.pid
+*.pid.lock

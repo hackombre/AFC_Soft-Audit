@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { api, getToken } from '@/lib/api';
 import { useMission } from '@/lib/mission-context';
 import type { DocumentItem, QuestionnaireNode, QuestionnaireStructure } from '@/lib/types';
@@ -77,6 +78,7 @@ function inDateRange(iso: string | null, filter: string): boolean {
 
 export default function DocumentationPage() {
   const { activeMission, loading: missionLoading } = useMission();
+  const router = useRouter();
   const [structure, setStructure] = useState<QuestionnaireStructure | null>(null);
   const [documents, setDocuments] = useState<DocumentItem[]>([]);
   const [activeId, setActiveId] = useState('');
@@ -222,7 +224,21 @@ export default function DocumentationPage() {
       {/* Folder tree */}
       <div className="flex flex-col shrink-0" style={{ width: '300px', background: 'white', borderRight: '1px solid #eef2f7' }}>
         <div className="px-4 pt-3.5 pb-3" style={{ borderBottom: '1px solid #eef2f7' }}>
-          <p className="text-sm font-semibold mb-1" style={{ color: '#0f172a' }}>Documentation</p>
+          <div className="flex items-center gap-2 mb-1">
+            <button
+              type="button"
+              onClick={() => router.push('/missions')}
+              className="w-8 h-8 flex items-center justify-center rounded-lg transition-all hover:bg-slate-100"
+              style={{ color: '#2563eb', border: '1px solid #dbeafe', background: '#eff6ff' }}
+              aria-label="Retourner au questionnaire de la mission"
+              title="Retourner au questionnaire de la mission"
+            >
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <path d="M10.5 3.5L6 8l4.5 4.5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </button>
+            <p className="text-sm font-semibold" style={{ color: '#0f172a' }}>Documentation</p>
+          </div>
           <p className="text-xs mb-3" style={{ color: '#94a3b8' }}>{documents.length} fichier{documents.length > 1 ? 's' : ''} au total</p>
 
           <div className="flex rounded-xl p-1 mb-2.5" style={{ background: '#f1f5f9' }}>
@@ -355,6 +371,19 @@ export default function DocumentationPage() {
                       {doc.uploaded_at && ` · ${new Date(doc.uploaded_at).toLocaleDateString('fr-FR')}`}
                     </p>
                   </div>
+                  {doc.drive_web_url && (
+                    <a
+                      href={doc.drive_web_url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="w-8 h-8 flex items-center justify-center rounded-lg shrink-0"
+                      style={{ border: '1.5px solid #bfdbfe', color: '#2563eb' }}
+                      aria-label="Ouvrir dans Google Drive"
+                      title="Ouvrir dans Google Drive"
+                    >
+                      ↗
+                    </a>
+                  )}
                   <button
                     onClick={() => handleDownload(doc)}
                     className="w-8 h-8 flex items-center justify-center rounded-lg shrink-0 transition-all"

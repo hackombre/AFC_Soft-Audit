@@ -13,8 +13,43 @@ class LoginRequest(BaseModel):
 
 
 class Token(BaseModel):
-    access_token: str
-    token_type: str = "bearer"
+    """
+    Réponse de connexion.
+
+    Le jeton n'apparaît plus ici : il est déposé dans un cookie
+    httpOnly, hors de portée du JavaScript de la page.
+    """
+
+    security_code: Optional[str] = None
+    must_change_password: bool = False
+
+
+class SecurityCodeVerify(BaseModel):
+    code: str
+
+
+class ChangePasswordRequest(BaseModel):
+    current_password: str
+    new_password: str = Field(min_length=8)
+
+
+class ForgotSecurityCodeRequest(BaseModel):
+    email: EmailStr
+    password: str
+
+
+class ForgotPasswordRequest(BaseModel):
+    email: EmailStr
+
+
+class VerifyPasswordResetCodeRequest(BaseModel):
+    email: EmailStr
+    code: str
+
+
+class ResetPasswordRequest(BaseModel):
+    reset_token: str
+    new_password: str = Field(min_length=8)
 
 
 # ---- Users ----
@@ -27,6 +62,7 @@ class UserOut(BaseModel):
     role: Role
     is_active: bool
     created_at: datetime
+    must_change_password: bool = False
 
     class Config:
         from_attributes = True
@@ -37,7 +73,7 @@ class UserCreate(BaseModel):
     first_name: str
     last_name: str
     role: Role
-    password: str = Field(min_length=8)
+    password: Optional[str] = Field(default=None, min_length=8)
 
 
 class UserUpdate(BaseModel):
@@ -52,11 +88,11 @@ class UserUpdate(BaseModel):
 
 class EntityCreate(BaseModel):
     name: str
+    sigle: str
     raison_sociale: Optional[str] = None
     forme_juridique: Optional[str] = None
     rccm: Optional[str] = None
     niu: Optional[str] = None
-    sigle: Optional[str] = None
 
 
 class EntityOut(BaseModel):
@@ -97,6 +133,14 @@ class MissionOut(BaseModel):
     created_at: datetime
     progress: float = 0.0
 
+    # Absent en temps normal. Renseigné uniquement lorsque la
+    # mission a bien été créée/modifiée mais que la
+    # synchronisation Google Drive qui suit a échoué (panne
+    # réseau transitoire, par exemple) : la mission n'est pas en
+    # échec pour autant, ce champ le signale sans en faire une
+    # erreur HTTP.
+    drive_sync_warning: Optional[str] = None
+
     class Config:
         from_attributes = True
 
@@ -130,6 +174,18 @@ class DocumentOut(BaseModel):
     size: Optional[int]
     uploaded_by: Optional[str]
     uploaded_at: Optional[datetime]
+    drive_web_url: Optional[str] = None
 
     class Config:
         from_attributes = True
+
+
+class GuideTemplateOut(BaseModel):
+    id: str
+    node_id: str
+    filename: str
+    content_type: str | None = None
+    size: int | None = None
+    uploaded_by: str | None = None
+    uploaded_at: datetime | None = None
+    download_url: str | None = None

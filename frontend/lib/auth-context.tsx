@@ -9,15 +9,19 @@ import {
   ReactNode,
 } from 'react';
 import { useRouter } from 'next/navigation';
-import { api, clearToken, getToken, setToken } from '@/lib/api';
+import { api } from '@/lib/api';
 import type { UserOut } from '@/lib/types';
+
+const SECURITY_VERIFIED_KEY = 'afcsoft_security_verified';
 
 interface AuthContextType {
   currentUser: UserOut | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
+  newSecurityCode: string | null;
+  clearNewSecurityCode: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -25,19 +29,17 @@ const AuthContext = createContext<AuthContextType | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [currentUser, setCurrentUser] = useState<UserOut | null>(null);
   const [loading, setLoading] = useState(true);
+  const [newSecurityCode, setNewSecurityCode] = useState<string | null>(null);
   const router = useRouter();
 
   const refreshUser = useCallback(async () => {
-    if (!getToken()) {
-      setCurrentUser(null);
-      setLoading(false);
-      return;
-    }
+    // Le cookie httpOnly n'est pas lisible ici : c'est le
+    // serveur qui fait autorité. Un 401 sur /me signifie
+    // simplement « pas de session valide ».
     try {
       const user = (await api.me()) as UserOut;
       setCurrentUser(user);
     } catch {
-      clearToken();
       setCurrentUser(null);
     } finally {
       setLoading(false);
@@ -51,24 +53,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = useCallback(
     async (email: string, password: string) => {
-      const { access_token } = await api.login(email, password);
-      setToken(access_token);
+      // Le serveur dépose lui-même le cookie de session.
+      const { security_code, must_change_password } = await api.login(email, password);
+      if (typeof window !== 'undefined') sessionStorage.removeItem(SECURITY_VERIFIED_KEY);
       const user = (await api.me()) as UserOut;
       setCurrentUser(user);
-      router.push('/missions');
+      if (security_code) setNewSecurityCode(security_code);
+      router.push(must_change_password ? '/change-password' : '/missions');
     },
     [router]
   );
 
-  const logout = useCallback(() => {
-    clearToken();
+  const logout = useCallback(async () => {
+    // Révocation côté serveur : le jeton devient inutilisable
+    // même s'il a déjà été intercepté.
+    try {
+      await api.logout();
+    } catch {
+      /* même en cas d'échec réseau, on nettoie l'état local */
+    }
+    if (typeof window !== 'undefined') sessionStorage.removeItem(SECURITY_VERIFIED_KEY);
     setCurrentUser(null);
     router.push('/login');
   }, [router]);
 
+  const clearNewSecurityCode = useCallback(() => setNewSecurityCode(null), []);
+
   return (
     <AuthContext.Provider
-      value={{ currentUser, loading, login, logout, refreshUser }}
+      value={{ currentUser, loading, login, logout, refreshUser, newSecurityCode, clearNewSecurityCode }}
     >
       {children}
     </AuthContext.Provider>

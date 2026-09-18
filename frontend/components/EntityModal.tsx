@@ -16,6 +16,7 @@ const FORMES_JURIDIQUES = [
 export default function EntityModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { refreshEntities, setActiveEntityId } = useMission();
   const [raisonSociale, setRaisonSociale] = useState('');
+  const [sigle, setSigle] = useState('');
   const [formeJuridique, setFormeJuridique] = useState('');
   const [rccm, setRccm] = useState('');
   const [niu, setNiu] = useState('');
@@ -24,6 +25,7 @@ export default function EntityModal({ open, onClose }: { open: boolean; onClose:
 
   function reset() {
     setRaisonSociale('');
+    setSigle('');
     setFormeJuridique('');
     setRccm('');
     setNiu('');
@@ -37,6 +39,7 @@ export default function EntityModal({ open, onClose }: { open: boolean; onClose:
     try {
       const entity = await api.createEntity({
         name: raisonSociale,
+        sigle: sigle.trim().toUpperCase(),
         raison_sociale: raisonSociale,
         forme_juridique: formeJuridique || null,
         rccm: rccm || null,
@@ -68,6 +71,20 @@ export default function EntityModal({ open, onClose }: { open: boolean; onClose:
             value={raisonSociale}
             onChange={(e) => setRaisonSociale(e.target.value)}
             placeholder="AUDITEX Société à responsabilité limitée"
+            className="w-full px-3.5 py-2.5 rounded-xl text-sm"
+            style={inputStyle}
+          />
+        </div>
+
+        <div>
+          <label className="block text-xs font-semibold mb-1.5" style={{ color: '#334155' }}>
+            Sigle <span style={{ color: '#ef4444' }}>*</span>
+          </label>
+          <input
+            required
+            value={sigle}
+            onChange={(e) => setSigle(e.target.value)}
+            placeholder="ABC"
             className="w-full px-3.5 py-2.5 rounded-xl text-sm"
             style={inputStyle}
           />
