@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { api, ApiError, setToken } from '@/lib/api';
+import { api, ApiError } from '@/lib/api';
 import { useAuth } from '@/lib/auth-context';
 import Logo from '@/components/Logo';
 
@@ -52,8 +52,8 @@ export default function ForgotPasswordPage() {
     if (newPassword !== confirmation) { setError('Les deux mots de passe ne correspondent pas.'); return; }
     setLoading(true);
     try {
-      const result = await api.resetPassword(resetToken, newPassword);
-      setToken(result.access_token);
+      // Le serveur dépose le cookie de session dans sa réponse.
+      await api.resetPassword(resetToken, newPassword);
       await refreshUser();
       if (typeof window !== 'undefined') sessionStorage.removeItem('afcsoft_security_verified');
       router.replace('/missions');
