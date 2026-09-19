@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { api, getToken } from '@/lib/api';
+import { api } from '@/lib/api';
 import { useMission } from '@/lib/mission-context';
 import type { DocumentItem, QuestionnaireNode, QuestionnaireStructure } from '@/lib/types';
 import FolderTree from '@/components/documents/FolderTree';
@@ -173,9 +173,8 @@ export default function DocumentationPage() {
   }
 
   async function handleDownload(doc: DocumentItem) {
-    const token = getToken();
     const res = await fetch(api.documentDownloadUrl(doc.id), {
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      credentials: 'same-origin',
     });
     if (!res.ok) return;
     const blob = await res.blob();
