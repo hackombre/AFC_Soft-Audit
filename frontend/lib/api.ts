@@ -1,26 +1,22 @@
 'use client';
 
 /*
- * API AFC Soft Audit
+ * AUTHENTIFICATION PAR COOKIE httpOnly
  *
- * Frontend :
- *   https://app.afc-audit.com
+ * Le jeton n'est plus stocké dans localStorage : il est déposé
+ * par le serveur dans un cookie httpOnly, illisible par le
+ * JavaScript de la page. Un script injecté ne peut donc plus
+ * l'exfiltrer.
  *
- * Backend :
- *   https://afc-soft-audit.onrender.com
- *
- * Authentification :
- *   cookie httpOnly fourni par le backend.
- *
- * IMPORTANT :
- * - credentials: 'include' est nécessaire car le frontend
- *   et le backend sont sur deux domaines différents.
- * - Toutes les requêtes API sont envoyées directement au backend.
+ * Conséquences :
+ * - plus rien à lire, écrire ou effacer côté client ;
+ * - le cookie part automatiquement avec chaque requête, car
+ *   toutes les URL sont relatives (/api/...) et passent par
+ *   les rewrites Next.js, donc en same-origin ;
+ * - la déconnexion doit appeler le serveur (api.logout) pour
+ *   révoquer le jeton, un simple effacement local ne suffit
+ *   plus — et c'est précisément le but.
  */
-
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL ||
-  'https://afc-soft-audit.onrender.com';
 
 export class ApiError extends Error {
   status: number;
@@ -75,15 +71,6 @@ function getApiErrorMessage(
   return fallback;
 }
 
-function buildApiUrl(path: string): string {
-  const cleanBase = API_BASE_URL.replace(/\/+$/, '');
-  const cleanPath = path.startsWith('/')
-    ? path
-    : `/${path}`;
-
-  return `${cleanBase}/api${cleanPath}`;
-}
-
 async function request<T>(
   path: string,
   options: RequestInit = {}
@@ -92,7 +79,8 @@ async function request<T>(
     ...(options.body &&
     !(options.body instanceof FormData)
       ? {
-          'Content-Type': 'application/json',
+          'Content-Type':
+            'application/json',
         }
       : {}),
     ...((options.headers as Record<
@@ -101,14 +89,13 @@ async function request<T>(
     >) || {}),
   };
 
-  const res = await fetch(
-    buildApiUrl(path),
-    {
-      ...options,
-      headers,
-      credentials: 'include',
-    }
-  );
+  const res = await fetch(`/api${path}`, {
+    ...options,
+    headers,
+    // Le cookie de session est same-origin : il doit être
+    // joint à chaque appel.
+    credentials: 'same-origin',
+  });
 
   if (!res.ok) {
     let detail = res.statusText;
@@ -142,13 +129,18 @@ export const api = {
      AUTHENTIFICATION
      ========================================================= */
 
+  /**
+   * Déconnexion.
+   *
+   * Doit passer par le serveur : c'est lui qui révoque le
+   * jeton et efface le cookie httpOnly. Un nettoyage
+   * uniquement côté client laisserait le jeton utilisable
+   * jusqu'à son expiration.
+   */
   logout: () =>
-    request<{ success: boolean }>(
-      '/auth/logout',
-      {
-        method: 'POST',
-      }
-    ),
+    request<{ success: boolean }>('/auth/logout', {
+      method: 'POST',
+    }),
 
   login: (
     email: string,
@@ -157,16 +149,13 @@ export const api = {
     request<{
       security_code?: string | null;
       must_change_password?: boolean;
-    }>(
-      '/auth/login',
-      {
-        method: 'POST',
-        body: JSON.stringify({
-          email,
-          password,
-        }),
-      }
-    ),
+    }>('/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({
+        email,
+        password,
+      }),
+    }),
 
   me: () =>
     request('/auth/me'),
@@ -176,15 +165,12 @@ export const api = {
   ) =>
     request<{
       valid: boolean;
-    }>(
-      '/auth/verify-security-code',
-      {
-        method: 'POST',
-        body: JSON.stringify({
-          code,
-        }),
-      }
-    ),
+    }>('/auth/verify-security-code', {
+      method: 'POST',
+      body: JSON.stringify({
+        code,
+      }),
+    }),
 
   forgotSecurityCode: (
     email: string,
@@ -192,16 +178,13 @@ export const api = {
   ) =>
     request<{
       success: boolean;
-    }>(
-      '/auth/forgot-security-code',
-      {
-        method: 'POST',
-        body: JSON.stringify({
-          email,
-          password,
-        }),
-      }
-    ),
+    }>('/auth/forgot-security-code', {
+      method: 'POST',
+      body: JSON.stringify({
+        email,
+        password,
+      }),
+    }),
 
   changePassword: (
     currentPassword: string,
@@ -209,32 +192,26 @@ export const api = {
   ) =>
     request<{
       success: boolean;
-    }>(
-      '/auth/change-password',
-      {
-        method: 'POST',
-        body: JSON.stringify({
-          current_password:
-            currentPassword,
-          new_password: newPassword,
-        }),
-      }
-    ),
+    }>('/auth/change-password', {
+      method: 'POST',
+      body: JSON.stringify({
+        current_password:
+          currentPassword,
+        new_password: newPassword,
+      }),
+    }),
 
   forgotPassword: (
     email: string
   ) =>
     request<{
       success: boolean;
-    }>(
-      '/auth/forgot-password',
-      {
-        method: 'POST',
-        body: JSON.stringify({
-          email,
-        }),
-      }
-    ),
+    }>('/auth/forgot-password', {
+      method: 'POST',
+      body: JSON.stringify({
+        email,
+      }),
+    }),
 
   verifyPasswordResetCode: (
     email: string,
@@ -243,16 +220,13 @@ export const api = {
     request<{
       success: boolean;
       reset_token: string;
-    }>(
-      '/auth/verify-password-reset-code',
-      {
-        method: 'POST',
-        body: JSON.stringify({
-          email,
-          code,
-        }),
-      }
-    ),
+    }>('/auth/verify-password-reset-code', {
+      method: 'POST',
+      body: JSON.stringify({
+        email,
+        code,
+      }),
+    }),
 
   resetPassword: (
     resetToken: string,
@@ -261,16 +235,13 @@ export const api = {
     request<{
       success: boolean;
       must_change_password: boolean;
-    }>(
-      '/auth/reset-password',
-      {
-        method: 'POST',
-        body: JSON.stringify({
-          reset_token: resetToken,
-          new_password: newPassword,
-        }),
-      }
-    ),
+    }>('/auth/reset-password', {
+      method: 'POST',
+      body: JSON.stringify({
+        reset_token: resetToken,
+        new_password: newPassword,
+      }),
+    }),
 
   /* =========================================================
      UTILISATEURS
@@ -432,7 +403,8 @@ export const api = {
 
     formData.append(
       'category',
-      options?.category ?? 'recus'
+      options?.category ??
+        'recus'
     );
 
     if (options?.questionId) {
@@ -450,12 +422,10 @@ export const api = {
     );
 
     const res = await fetch(
-      buildApiUrl(
-        `/documents/missions/${missionId}/upload`
-      ),
+      `/api/documents/missions/${missionId}/upload`,
       {
         method: 'POST',
-        credentials: 'include',
+        credentials: 'same-origin',
         body: formData,
       }
     );
@@ -499,14 +469,15 @@ export const api = {
   documentDownloadUrl: (
     documentId: string
   ) =>
-    buildApiUrl(
-      `/documents/${documentId}/download`
-    ),
+    `/api/documents/${documentId}/download`,
 
   /* =========================================================
      MODÈLES DE GUIDES
      ========================================================= */
 
+  /**
+   * Récupère tous les modèles de guides.
+   */
   listGuideTemplates: () =>
     request<
       import('./types').GuideTemplate[]
@@ -514,6 +485,10 @@ export const api = {
       '/guide-templates'
     ),
 
+  /**
+   * Upload d'un modèle de guide
+   * associé à un nœud du questionnaire.
+   */
   uploadGuideTemplate: async (
     nodeId: string,
     file: File
@@ -532,12 +507,10 @@ export const api = {
     );
 
     const res = await fetch(
-      buildApiUrl(
-        '/guide-templates/upload'
-      ),
+      '/api/guide-templates/upload',
       {
         method: 'POST',
-        credentials: 'include',
+        credentials: 'same-origin',
         body: formData,
       }
     );
@@ -568,6 +541,9 @@ export const api = {
     return res.json();
   },
 
+  /**
+   * Supprime un modèle de guide.
+   */
   deleteGuideTemplate: (
     templateId: string
   ) =>
@@ -580,15 +556,29 @@ export const api = {
       }
     ),
 
+  /**
+   * URL simple du téléchargement.
+   *
+   * Conservée pour les endroits de
+   * l'application qui utilisent directement
+   * l'URL.
+   */
   guideTemplateDownloadUrl: (
     templateId: string
   ) =>
-    buildApiUrl(
-      `/guide-templates/${String(
-        templateId
-      ).trim()}/download`
-    ),
+    `/api/guide-templates/${String(
+      templateId
+    ).trim()}/download`,
 
+  /**
+   * Téléchargement authentifié d'un modèle
+   * de guide.
+   *
+   * Le JWT est envoyé dans Authorization.
+   * La réponse est récupérée sous forme
+   * de Blob afin que le navigateur force
+   * le téléchargement du fichier.
+   */
   downloadGuideTemplate: async (
     templateId: string
   ): Promise<Blob> => {
@@ -603,17 +593,15 @@ export const api = {
     }
 
     const url =
-      buildApiUrl(
-        `/guide-templates/${encodeURIComponent(
-          cleanId
-        )}/download`
-      );
+      `/api/guide-templates/${encodeURIComponent(
+        cleanId
+      )}/download`;
 
     const res = await fetch(
       url,
       {
         method: 'GET',
-        credentials: 'include',
+        credentials: 'same-origin',
       }
     );
 
