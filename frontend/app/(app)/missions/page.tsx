@@ -3298,7 +3298,7 @@ export default function MissionsWorkspacePage() {
                           return (
                             <div>
                               {visibleQuestions.map(
-                                (q) => {
+                                (q, qIndex) => {
                                   const label =
                                     cleanLabel(
                                       q.label
@@ -3309,6 +3309,28 @@ export default function MissionsWorkspacePage() {
                                       'label' &&
                                     /^(?:a\)|b\)|c\)|d\)|e\)|f\))/i.test(
                                       label
+                                    );
+
+                                  const previousQuestion =
+                                    qIndex > 0
+                                      ? visibleQuestions[qIndex - 1]
+                                      : null;
+
+                                  const deferredGuideFiles =
+                                    q.type === 'label' &&
+                                    !isHeader &&
+                                    previousQuestion?.guide_files?.length
+                                      ? previousQuestion.guide_files
+                                      : [];
+
+                                  const guidesAreDeferred =
+                                    Boolean(
+                                      q.guide_files?.length &&
+                                      qIndex < visibleQuestions.length - 1 &&
+                                      visibleQuestions[qIndex + 1]?.type === 'label' &&
+                                      !(/^(?:a\)|b\)|c\)|d\)|e\)|f\))/i.test(
+                                        cleanLabel(visibleQuestions[qIndex + 1].label)
+                                      ))
                                     );
 
                                   if (
@@ -3339,48 +3361,50 @@ export default function MissionsWorkspacePage() {
                                           }
                                         </p>
 
-                                        {q.guide_files
+                                        {!guidesAreDeferred && q.guide_files
                                           ?.length ? (
-                                          <div className="flex flex-wrap gap-2 mt-2">
+                                          <div className="mt-3 flex flex-col items-start gap-2">
                                             {q.guide_files.map(
                                               (
                                                 g
                                               ) => (
-                                                <button
+                                                <div
                                                   key={
                                                     g.id ||
                                                     g.url ||
                                                     g.label
                                                   }
-                                                  type="button"
-                                                  onClick={() =>
-                                                    void handleGuideDownload(
-                                                      g
-                                                    )
-                                                  }
-                                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold"
-                                                  style={{
-                                                    color:
-                                                      '#2563eb',
-                                                    background:
-                                                      '#eff6ff',
-                                                    border:
-                                                      '1px solid #bfdbfe',
-                                                  }}
+                                                  className="flex flex-col items-start gap-1.5"
                                                 >
-                                                  <span>
-                                                    ↓
+                                                  <span
+                                                    className="text-xs font-medium"
+                                                    style={{
+                                                      color: '#475569',
+                                                    }}
+                                                  >
+                                                    {g.label}
                                                   </span>
 
-                                                  <span>
-                                                    {
-                                                      g.label
-                                                    }{' '}
-                                                    ·
-                                                    Télécharger
-                                                    le modèle
-                                                  </span>
-                                                </button>
+                                                  <button
+                                                    type="button"
+                                                    onClick={() =>
+                                                      void handleGuideDownload(
+                                                        g
+                                                      )
+                                                    }
+                                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold"
+                                                    style={{
+                                                      color: '#2563eb',
+                                                      background: '#eff6ff',
+                                                      border: '1px solid #bfdbfe',
+                                                    }}
+                                                  >
+                                                    <span>↓</span>
+                                                    <span>
+                                                      Télécharger le modèle
+                                                    </span>
+                                                  </button>
+                                                </div>
                                               )
                                             )}
                                           </div>
@@ -3416,48 +3440,49 @@ export default function MissionsWorkspacePage() {
                                           }
                                         </p>
 
-                                        {q.guide_files
-                                          ?.length ? (
-                                          <div className="flex flex-wrap gap-2 mt-2">
-                                            {q.guide_files.map(
+                                        {deferredGuideFiles.length ? (
+                                          <div className="mt-3 flex flex-col items-start gap-2">
+                                            {deferredGuideFiles.map(
                                               (
                                                 g
                                               ) => (
-                                                <button
+                                                <div
                                                   key={
                                                     g.id ||
                                                     g.url ||
                                                     g.label
                                                   }
-                                                  type="button"
-                                                  onClick={() =>
-                                                    void handleGuideDownload(
-                                                      g
-                                                    )
-                                                  }
-                                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold"
-                                                  style={{
-                                                    color:
-                                                      '#2563eb',
-                                                    background:
-                                                      '#eff6ff',
-                                                    border:
-                                                      '1px solid #bfdbfe',
-                                                  }}
+                                                  className="flex flex-col items-start gap-1.5"
                                                 >
-                                                  <span>
-                                                    ↓
+                                                  <span
+                                                    className="text-xs font-medium"
+                                                    style={{
+                                                      color: '#475569',
+                                                    }}
+                                                  >
+                                                    {g.label}
                                                   </span>
 
-                                                  <span>
-                                                    {
-                                                      g.label
-                                                    }{' '}
-                                                    ·
-                                                    Télécharger
-                                                    le modèle
-                                                  </span>
-                                                </button>
+                                                  <button
+                                                    type="button"
+                                                    onClick={() =>
+                                                      void handleGuideDownload(
+                                                        g
+                                                      )
+                                                    }
+                                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold"
+                                                    style={{
+                                                      color: '#2563eb',
+                                                      background: '#eff6ff',
+                                                      border: '1px solid #bfdbfe',
+                                                    }}
+                                                  >
+                                                    <span>↓</span>
+                                                    <span>
+                                                      Télécharger le modèle
+                                                    </span>
+                                                  </button>
+                                                </div>
                                               )
                                             )}
                                           </div>
