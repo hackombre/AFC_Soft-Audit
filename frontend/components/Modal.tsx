@@ -25,12 +25,12 @@ export default function Modal({ open, onClose, title, subtitle, children, maxWid
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center px-4 animate-fade-in"
+      className="afc-modal-backdrop fixed inset-0 z-[100] flex items-center justify-center px-4 animate-fade-in"
       style={{ background: 'rgba(15,23,42,0.45)' }}
       onClick={onClose}
     >
       <div
-        className="w-full rounded-2xl overflow-hidden animate-fade-in"
+        className="afc-modal-card w-full rounded-2xl overflow-hidden animate-fade-in"
         style={{ maxWidth, background: 'white', boxShadow: '0 24px 70px -20px rgba(15,23,42,0.35)' }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -56,3 +56,4 @@ export default function Modal({ open, onClose, title, subtitle, children, maxWid
     document.body
   );
 }
+
