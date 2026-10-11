@@ -36,7 +36,7 @@ function IconButton({
   );
 }
 
-export default function TopBar() {
+export default function TopBar({ onToggleNavigation }: { onToggleNavigation?: () => void }) {
   const { currentUser, logout } = useAuth();
   const { activeEntity, activeMission } = useMission();
   const pathname = usePathname();
@@ -45,14 +45,19 @@ export default function TopBar() {
 
   return (
     <header
-      className="grid items-center px-6 shrink-0 z-20 relative"
+      className="app-topbar grid items-center px-6 shrink-0 z-20 relative"
       style={{ height: '72px', background: 'white', borderBottom: '1px solid #eef2f7', gridTemplateColumns: '1fr auto 1fr' }}
     >
-      <Link href="/missions" className="flex items-center shrink-0">
-        <Logo className="h-14 w-auto" />
-      </Link>
+      <div className="flex items-center gap-2 min-w-0">
+        <button type="button" aria-label="Ouvrir le menu des missions" onClick={onToggleNavigation} className="app-hamburger shrink-0">
+          <span /> <span /> <span />
+        </button>
+        <Link href="/missions" className="flex items-center shrink-0">
+          <Logo className="h-14 w-auto" />
+        </Link>
+      </div>
 
-      <div className="flex items-center justify-center">
+      <div className="app-topbar-context flex items-center justify-center">
         {activeEntity && (
           <div
             className="text-center px-8"
@@ -73,7 +78,7 @@ export default function TopBar() {
         )}
       </div>
 
-      <div className="flex items-center justify-end gap-6">
+      <div className="app-topbar-actions flex items-center justify-end gap-6">
         <nav className="flex items-center gap-1">
           {isAssociate && (
             <IconButton href="/utilisateurs" active={pathname?.startsWith('/utilisateurs') ?? false} label="Utilisateurs">
@@ -137,3 +142,4 @@ export default function TopBar() {
     </header>
   );
 }
+
