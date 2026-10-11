@@ -561,6 +561,3 @@ export default function GuideTemplatesPage() {
   );
 }
 
-
-}
-
