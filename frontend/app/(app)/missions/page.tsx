@@ -262,6 +262,10 @@ export default function MissionsWorkspacePage() {
   const [activeId, setActiveId] =
     useState<string>('');
 
+  // Sur mobile, la navigation du questionnaire s'ouvre depuis le menu à trois traits.
+  const [mobileMenuOpen, setMobileMenuOpen] =
+    useState(false);
+
   const [expanded, setExpanded] =
     useState<Set<string>>(new Set());
 
@@ -599,6 +603,7 @@ export default function MissionsWorkspacePage() {
     }
 
     setShowReport(false);
+    setMobileMenuOpen(false);
     
     setQuestionToFocus(null);
 
@@ -2497,8 +2502,31 @@ export default function MissionsWorkspacePage() {
                 SIDEBAR MISSION
             ================================================= */}
 
+            {/* Menu mobile : les trois traits ouvrent/ferment la navigation */}
+            <div className="flex items-center justify-between gap-3 border-b border-slate-200 bg-white px-4 py-3 md:hidden">
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-semibold text-slate-900">
+                  {showReport ? 'Rapport' : 'Navigation de la mission'}
+                </p>
+                <p className="truncate text-xs text-slate-500">
+                  {activeMission.name}
+                </p>
+              </div>
+              <button
+                type="button"
+                aria-label={mobileMenuOpen ? 'Fermer le menu de navigation' : 'Ouvrir le menu de navigation'}
+                aria-expanded={mobileMenuOpen}
+                onClick={() => setMobileMenuOpen((open) => !open)}
+                className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <svg aria-hidden="true" viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                  {mobileMenuOpen ? <path d="M6 6l12 12M18 6L6 18" /> : <path d="M4 6h16M4 12h16M4 18h16" />}
+                </svg>
+              </button>
+            </div>
+
             <div
-              className="flex w-full max-h-[38vh] shrink-0 flex-col overflow-y-auto border-b border-slate-100 md:max-h-none md:w-[300px] md:border-b-0 md:border-r"
+              className={`${mobileMenuOpen ? 'flex' : 'hidden'} w-full max-h-[45vh] shrink-0 flex-col overflow-y-auto border-b border-slate-100 md:flex md:max-h-none md:w-[300px] md:border-b-0 md:border-r`}
               style={{
                 background:
                   'white',
@@ -2595,7 +2623,7 @@ export default function MissionsWorkspacePage() {
                       null
                     );
 
-
+                    setMobileMenuOpen(false);
                     setShowReport(
                       true
                     );
