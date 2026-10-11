@@ -12,6 +12,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { currentUser, loading, newSecurityCode, clearNewSecurityCode } = useAuth();
   const router = useRouter();
   const [securityGateOpen, setSecurityGateOpen] = useState(false);
+  const [mobileMissionMenuOpen, setMobileMissionMenuOpen] = useState(false);
 
   useEffect(() => {
     if (!loading && !currentUser) {
@@ -40,11 +41,21 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex flex-col h-screen" style={{ background: '#fafbfd' }}>
-      <TopBar />
-      <div className="flex flex-1 overflow-hidden">
-        {/* Sidebar des missions — persistante sur toutes les pages, ne bouge pas */}
-        <MissionsPanel />
-        <div className="flex flex-1 overflow-hidden">{children}</div>
+      <TopBar onToggleNavigation={() => setMobileMissionMenuOpen((open) => !open)} />
+      <div className="app-workspace flex flex-1 overflow-hidden">
+        {mobileMissionMenuOpen && (
+          <button
+            type="button"
+            aria-label="Fermer le menu des missions"
+            className="app-mobile-backdrop"
+            onClick={() => setMobileMissionMenuOpen(false)}
+          />
+        )}
+        {/* Sur mobile, ce panneau devient un menu latéral repliable. */}
+        <div className={`app-missions-sidebar${mobileMissionMenuOpen ? ' is-open' : ''}`}>
+          <MissionsPanel onNavigate={() => setMobileMissionMenuOpen(false)} />
+        </div>
+        <div className="app-page-content flex flex-1 overflow-hidden" onClick={() => mobileMissionMenuOpen && setMobileMissionMenuOpen(false)}>{children}</div>
       </div>
       {newSecurityCode && (
         <SecurityCodeRevealModal code={newSecurityCode} onClose={() => {
