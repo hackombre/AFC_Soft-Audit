@@ -62,7 +62,7 @@ function statusOf(m: Mission): {
   };
 }
 
-export default function MissionsPanel() {
+export default function MissionsPanel({ onNavigate }: { onNavigate?: () => void }) {
   const { currentUser } = useAuth();
   const router = useRouter();
 
@@ -97,6 +97,7 @@ export default function MissionsPanel() {
 
   function handleSelectEntity(entityId: string) {
     setActiveEntityId(entityId);
+    onNavigate?.();
     router.push('/missions');
   }
 
@@ -178,6 +179,7 @@ export default function MissionsPanel() {
 
   function goToQuestionnaire(missionId: string) {
     setActiveMissionId(missionId);
+    onNavigate?.();
     router.push('/missions');
   }
 
