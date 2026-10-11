@@ -89,6 +89,7 @@ export default function DocumentationPage() {
   const [filter, setFilter] = useState('');
   const [category, setCategory] = useState<'recus' | 'travaux'>('recus');
   const [dateFilter, setDateFilter] = useState('toutes');
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -138,6 +139,7 @@ export default function DocumentationPage() {
 
   function selectNode(id: string) {
     setActiveId(id);
+    setMobileMenuOpen(false);
     if (structure) {
       setExpanded((prev) => new Set([...prev, ...(ancestorIds(structure.sections, id) ?? [])]));
     }
@@ -224,9 +226,20 @@ export default function DocumentationPage() {
     : structure.sections;
 
   return (
-    <div className="afc-documentation-layout flex flex-1 overflow-hidden" style={{ background: '#fafbfd' }}>
-      {/* Folder tree */}
-      <div className="afc-documentation-sidebar flex flex-col shrink-0" style={{ width: '300px', background: 'white', borderRight: '1px solid #eef2f7' }}>
+    <div className="afc-documentation-layout relative flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden md:flex-row" style={{ background: '#fafbfd' }}>
+      {mobileMenuOpen && (
+        <button
+          type="button"
+          aria-label="Fermer le menu de documentation"
+          onClick={() => setMobileMenuOpen(false)}
+          className="fixed inset-0 z-40 bg-slate-950/40 md:hidden"
+        />
+      )}
+      {/* Navigation des dossiers : tiroir sur mobile, barre latérale sur ordinateur */}
+      <div
+        className={`afc-documentation-sidebar fixed inset-y-0 left-0 z-50 flex w-[min(88vw,320px)] min-h-0 shrink-0 flex-col overflow-hidden transition-transform duration-200 md:relative md:inset-auto md:z-auto md:w-[300px] md:translate-x-0 md:border-b-0 ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}
+        style={{ background: 'white', borderRight: '1px solid #eef2f7' }}
+      >
         <div className="px-4 pt-3.5 pb-3" style={{ borderBottom: '1px solid #eef2f7' }}>
           <div className="flex items-center gap-2 mb-1">
             <button
@@ -294,11 +307,28 @@ export default function DocumentationPage() {
         </div>
       </div>
 
-      {/* Content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      {/* Contenu */}
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+        <div className="flex shrink-0 items-center gap-3 border-b border-slate-100 bg-white px-3 py-2 md:hidden">
+          <button
+            type="button"
+            onClick={() => setMobileMenuOpen(true)}
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 shadow-sm"
+            aria-label="Ouvrir le menu de documentation"
+            aria-expanded={mobileMenuOpen}
+          >
+            <svg width="21" height="21" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+            </svg>
+          </button>
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-sm font-semibold text-slate-900">Documentation</p>
+            <p className="truncate text-xs text-slate-500">{currentNode ? `${currentNode.id}. ${currentNode.label}` : 'Choisir un dossier'}</p>
+          </div>
+        </div>
         {currentNode && (
-          <div className="px-6 py-4 shrink-0" style={{ borderBottom: '1px solid #eef2f7', background: 'white' }}>
-            <p className="text-xs mb-1 truncate" style={{ color: '#94a3b8' }}>
+          <div className="shrink-0 bg-white px-3 py-3 sm:px-6 sm:py-4" style={{ borderBottom: '1px solid #eef2f7' }}>
+            <p className="mb-1 truncate text-xs" style={{ color: '#94a3b8' }}>
               {breadcrumb.slice(0, -1).join(' › ') || 'Questionnaire'}
             </p>
             <h3 className="text-base font-semibold truncate" style={{ color: '#0f172a' }}>
@@ -307,7 +337,7 @@ export default function DocumentationPage() {
           </div>
         )}
 
-        <div className="flex-1 overflow-y-auto px-6 py-5">
+        <div className="min-h-0 min-w-0 flex-1 overflow-y-auto px-3 py-4 sm:px-6 sm:py-5">
           {/* Drop zone */}
           <div
             onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
@@ -317,7 +347,7 @@ export default function DocumentationPage() {
               setDragOver(false);
               handleFiles(e.dataTransfer.files);
             }}
-            className="rounded-2xl flex flex-col items-center justify-center py-8 mb-6 text-center transition-all cursor-pointer"
+            className="mb-5 flex cursor-pointer flex-col items-center justify-center rounded-2xl px-3 py-7 text-center transition-all sm:mb-6 sm:py-8"
             style={{
               border: `1.5px dashed ${dragOver ? '#2563eb' : '#dbeafe'}`,
               background: dragOver ? '#eff6ff' : '#f8fafd',
@@ -360,7 +390,7 @@ export default function DocumentationPage() {
               {currentDocs.map((doc, i) => (
                 <div
                   key={doc.id}
-                  className="flex items-center gap-3 px-4 py-3 bg-white"
+                  className="flex min-w-0 flex-wrap items-center gap-2 bg-white px-3 py-3 sm:flex-nowrap sm:gap-3 sm:px-4"
                   style={{ borderTop: i === 0 ? 'none' : '1px solid #f1f5f9' }}
                 >
                   <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0" style={{ background: '#f8fafd' }}>
@@ -417,4 +447,3 @@ export default function DocumentationPage() {
     </div>
   );
 }
-
