@@ -284,9 +284,6 @@ export default function MissionsWorkspacePage() {
   const [showReport, setShowReport] =
     useState(false);
 
-  const [mobileQuestionNavOpen, setMobileQuestionNavOpen] =
-    useState(false);
-
   const [questionToFocus, setQuestionToFocus] =
     useState<string | null>(null);
 
@@ -606,7 +603,6 @@ export default function MissionsWorkspacePage() {
     setQuestionToFocus(null);
 
     setActiveId(id);
-    setMobileQuestionNavOpen(false);
 
     if (structure) {
       setExpanded(
@@ -1795,11 +1791,11 @@ export default function MissionsWorkspacePage() {
       return (
         <div
           key={node.id}
-          className="mb-6"
+          className="mb-4 min-w-0 sm:mb-6"
         >
           {/* ÉLÉMENT / ÉTAPE / SOUS-ÉTAPE */}
           <div
-            className="rounded-xl border bg-white"
+            className="min-w-0 rounded-xl border bg-white"
             style={{
               borderColor:
                 depth === 0
@@ -2140,7 +2136,7 @@ export default function MissionsWorkspacePage() {
           {node.children?.length >
             0 && (
             <div
-              className="mt-4 ml-4 border-l-2 pl-4"
+              className="mt-3 ml-2 border-l-2 pl-2 sm:mt-4 sm:ml-4 sm:pl-4"
               style={{
                 borderColor:
                   '#e2e8f0',
@@ -2437,7 +2433,7 @@ export default function MissionsWorkspacePage() {
   }
 
   return (
-    <div className="flex flex-1 overflow-hidden">
+    <div className="flex flex-1 min-h-0 min-w-0 flex-col overflow-hidden md:flex-row">
 
       {!activeMission && (
         <div
@@ -2501,22 +2497,11 @@ export default function MissionsWorkspacePage() {
                 SIDEBAR MISSION
             ================================================= */}
 
-            {mobileQuestionNavOpen && (
-              <button
-                type="button"
-                aria-label="Fermer le menu des étapes"
-                className="mission-nav-backdrop"
-                onClick={() => setMobileQuestionNavOpen(false)}
-              />
-            )}
             <div
-              className={`mission-question-nav flex flex-col shrink-0${mobileQuestionNavOpen ? ' is-open' : ''}`}
+              className="flex w-full max-h-[38vh] shrink-0 flex-col overflow-y-auto border-b border-slate-100 md:max-h-none md:w-[300px] md:border-b-0 md:border-r"
               style={{
-                width: '300px',
                 background:
                   'white',
-                borderRight:
-                  '1px solid #eef2f7',
               }}
             >
               <div
@@ -2614,7 +2599,6 @@ export default function MissionsWorkspacePage() {
                     setShowReport(
                       true
                     );
-                    setMobileQuestionNavOpen(false);
                   }}
                   className="mx-3 my-2 flex w-[calc(100%-1.5rem)] items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-semibold"
                   style={{
@@ -2651,22 +2635,7 @@ export default function MissionsWorkspacePage() {
                 CONTENU PRINCIPAL
             ================================================= */}
 
-            <div className="mission-main-content flex-1 flex flex-col overflow-hidden">
-              <div className="mission-mobile-stepbar">
-                <button
-                  type="button"
-                  className="mission-step-menu-button"
-                  aria-label="Choisir une étape ou une rubrique"
-                  aria-expanded={mobileQuestionNavOpen}
-                  onClick={() => setMobileQuestionNavOpen((open) => !open)}
-                >
-                  <span /> <span /> <span />
-                </button>
-                <div className="min-w-0">
-                  <p className="mission-mobile-step-caption">Mission en cours</p>
-                  <p className="mission-mobile-step-title">{showReport ? 'Rapport de mission' : (structure ? (flattenNavigable(structure.sections).find((item) => item.node.id === activeId)?.node.label ?? 'Choisir une étape') : 'Chargement…')}</p>
-                </div>
-              </div>
+            <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
 
               {/* =================================================
                   RAPPORT
@@ -2675,7 +2644,7 @@ export default function MissionsWorkspacePage() {
               {showReport ? (
                 <>
                   <div
-                    className="flex items-center justify-between px-6 py-4 shrink-0"
+                    className="flex shrink-0 flex-col items-stretch justify-between gap-3 px-4 py-3 sm:flex-row sm:items-center sm:px-6 sm:py-4"
                     style={{
                       borderBottom:
                         '1px solid #eef2f7',
@@ -2695,7 +2664,7 @@ export default function MissionsWorkspacePage() {
                       </div>
 
                       <h3
-                        className="text-xl font-bold mt-1"
+                        className="mt-1 break-words text-lg font-bold sm:text-xl"
                         style={{
                           color:
                             '#0f172a',
@@ -2721,7 +2690,7 @@ export default function MissionsWorkspacePage() {
                         onClick={() =>
                           void handleEditReport()
                         }
-                        className="shrink-0 flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold"
+                        className="flex w-full shrink-0 items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold sm:w-auto"
                         style={{
                           background:
                             'linear-gradient(135deg, #2563eb, #4f9cf9)',
@@ -2739,11 +2708,11 @@ export default function MissionsWorkspacePage() {
                       </button>
                     </div>
 
-                  <div className="flex-1 overflow-y-auto px-6 py-5">
-                    <div className="max-w-5xl mx-auto">
+                  <div className="min-h-0 flex-1 overflow-y-auto px-3 py-4 sm:px-6 sm:py-5">
+                    <div className="mx-auto w-full max-w-5xl min-w-0">
 
                       {/* STATISTIQUES */}
-                      <div className="grid grid-cols-4 gap-4 mb-6">
+                      <div className="mb-6 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
 
                         <div
                           className="rounded-xl p-4"
@@ -2968,7 +2937,7 @@ export default function MissionsWorkspacePage() {
 
                   {current && (
                     <div
-                      className="flex items-center justify-between px-6 py-3 shrink-0"
+                      className="flex shrink-0 flex-col items-stretch justify-between gap-3 px-3 py-3 sm:flex-row sm:items-center sm:px-6"
                       style={{
                         borderBottom:
                           '1px solid #eef2f7',
@@ -3086,7 +3055,7 @@ export default function MissionsWorkspacePage() {
                     </div>
                   )}
 
-                  <div className="flex-1 overflow-y-auto px-6 py-5">
+                  <div className="min-h-0 flex-1 overflow-y-auto px-3 py-4 sm:px-6 sm:py-5">
                     <div className="max-w-3xl animate-fade-in">
 
                       {loading && (
@@ -3326,7 +3295,7 @@ export default function MissionsWorkspacePage() {
                           return (
                             <div>
                               {visibleQuestions.map(
-                                (q) => {
+                                (q, qIndex) => {
                                   const label =
                                     cleanLabel(
                                       q.label
@@ -3337,6 +3306,28 @@ export default function MissionsWorkspacePage() {
                                       'label' &&
                                     /^(?:a\)|b\)|c\)|d\)|e\)|f\))/i.test(
                                       label
+                                    );
+
+                                  const previousQuestion =
+                                    qIndex > 0
+                                      ? visibleQuestions[qIndex - 1]
+                                      : null;
+
+                                  const deferredGuideFiles =
+                                    q.type === 'label' &&
+                                    !isHeader &&
+                                    previousQuestion?.guide_files?.length
+                                      ? previousQuestion.guide_files
+                                      : [];
+
+                                  const guidesAreDeferred =
+                                    Boolean(
+                                      q.guide_files?.length &&
+                                      qIndex < visibleQuestions.length - 1 &&
+                                      visibleQuestions[qIndex + 1]?.type === 'label' &&
+                                      !(/^(?:a\)|b\)|c\)|d\)|e\)|f\))/i.test(
+                                        cleanLabel(visibleQuestions[qIndex + 1].label)
+                                      ))
                                     );
 
                                   if (
@@ -3367,48 +3358,50 @@ export default function MissionsWorkspacePage() {
                                           }
                                         </p>
 
-                                        {q.guide_files
+                                        {!guidesAreDeferred && q.guide_files
                                           ?.length ? (
-                                          <div className="flex flex-wrap gap-2 mt-2">
+                                          <div className="mt-3 flex flex-col items-start gap-2">
                                             {q.guide_files.map(
                                               (
                                                 g
                                               ) => (
-                                                <button
+                                                <div
                                                   key={
                                                     g.id ||
                                                     g.url ||
                                                     g.label
                                                   }
-                                                  type="button"
-                                                  onClick={() =>
-                                                    void handleGuideDownload(
-                                                      g
-                                                    )
-                                                  }
-                                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold"
-                                                  style={{
-                                                    color:
-                                                      '#2563eb',
-                                                    background:
-                                                      '#eff6ff',
-                                                    border:
-                                                      '1px solid #bfdbfe',
-                                                  }}
+                                                  className="flex flex-col items-start gap-1.5"
                                                 >
-                                                  <span>
-                                                    ↓
+                                                  <span
+                                                    className="text-xs font-medium"
+                                                    style={{
+                                                      color: '#475569',
+                                                    }}
+                                                  >
+                                                    {g.label}
                                                   </span>
 
-                                                  <span>
-                                                    {
-                                                      g.label
-                                                    }{' '}
-                                                    ·
-                                                    Télécharger
-                                                    le modèle
-                                                  </span>
-                                                </button>
+                                                  <button
+                                                    type="button"
+                                                    onClick={() =>
+                                                      void handleGuideDownload(
+                                                        g
+                                                      )
+                                                    }
+                                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold"
+                                                    style={{
+                                                      color: '#2563eb',
+                                                      background: '#eff6ff',
+                                                      border: '1px solid #bfdbfe',
+                                                    }}
+                                                  >
+                                                    <span>↓</span>
+                                                    <span>
+                                                      Télécharger le modèle
+                                                    </span>
+                                                  </button>
+                                                </div>
                                               )
                                             )}
                                           </div>
@@ -3444,48 +3437,49 @@ export default function MissionsWorkspacePage() {
                                           }
                                         </p>
 
-                                        {q.guide_files
-                                          ?.length ? (
-                                          <div className="flex flex-wrap gap-2 mt-2">
-                                            {q.guide_files.map(
+                                        {deferredGuideFiles.length ? (
+                                          <div className="mt-3 flex flex-col items-start gap-2">
+                                            {deferredGuideFiles.map(
                                               (
                                                 g
                                               ) => (
-                                                <button
+                                                <div
                                                   key={
                                                     g.id ||
                                                     g.url ||
                                                     g.label
                                                   }
-                                                  type="button"
-                                                  onClick={() =>
-                                                    void handleGuideDownload(
-                                                      g
-                                                    )
-                                                  }
-                                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold"
-                                                  style={{
-                                                    color:
-                                                      '#2563eb',
-                                                    background:
-                                                      '#eff6ff',
-                                                    border:
-                                                      '1px solid #bfdbfe',
-                                                  }}
+                                                  className="flex flex-col items-start gap-1.5"
                                                 >
-                                                  <span>
-                                                    ↓
+                                                  <span
+                                                    className="text-xs font-medium"
+                                                    style={{
+                                                      color: '#475569',
+                                                    }}
+                                                  >
+                                                    {g.label}
                                                   </span>
 
-                                                  <span>
-                                                    {
-                                                      g.label
-                                                    }{' '}
-                                                    ·
-                                                    Télécharger
-                                                    le modèle
-                                                  </span>
-                                                </button>
+                                                  <button
+                                                    type="button"
+                                                    onClick={() =>
+                                                      void handleGuideDownload(
+                                                        g
+                                                      )
+                                                    }
+                                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold"
+                                                    style={{
+                                                      color: '#2563eb',
+                                                      background: '#eff6ff',
+                                                      border: '1px solid #bfdbfe',
+                                                    }}
+                                                  >
+                                                    <span>↓</span>
+                                                    <span>
+                                                      Télécharger le modèle
+                                                    </span>
+                                                  </button>
+                                                </div>
                                               )
                                             )}
                                           </div>
@@ -3686,7 +3680,7 @@ export default function MissionsWorkspacePage() {
 
                   {/* FOOTER */}
                   <div
-                    className="flex items-center justify-between px-6 py-3 shrink-0"
+                    className="flex shrink-0 flex-col items-stretch justify-between gap-3 px-3 py-3 sm:flex-row sm:items-center sm:px-6"
                     style={{
                       borderTop:
                         '1px solid #eef2f7',
