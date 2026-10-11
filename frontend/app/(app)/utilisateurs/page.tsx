@@ -138,9 +138,9 @@ export default function UsersPage() {
   }
 
   return (
-    <div className="flex-1 overflow-y-auto">
-      <div className="px-8 py-7 max-w-4xl mx-auto">
-        <div className="flex items-center justify-between mb-8">
+    <div className="users-page flex-1 min-h-0 min-w-0 overflow-y-auto">
+      <div className="users-page-inner px-8 py-7 max-w-4xl mx-auto">
+        <div className="users-page-header flex items-center justify-between mb-8">
           <div>
             <p
               className="text-xs font-semibold uppercase tracking-wide mb-1"
@@ -179,10 +179,10 @@ export default function UsersPage() {
         {formOpen && (
           <form
             onSubmit={handleCreate}
-            className="bg-white rounded-xl2 p-6 mb-6 space-y-4 animate-fade-in"
+            className="users-create-form bg-white rounded-xl2 p-6 mb-6 space-y-4 animate-fade-in"
             style={{ border: '1px solid #e2e8f0' }}
           >
-            <div className="grid grid-cols-2 gap-4">
+            <div className="users-name-grid grid grid-cols-2 gap-4">
               <div>
                 <label
                   className="block text-xs font-semibold mb-1.5"
@@ -367,7 +367,7 @@ export default function UsersPage() {
             users.map((u, i) => (
               <div
                 key={u.id}
-                className="flex items-center gap-4 px-5 py-3.5"
+                className="users-list-row flex items-center gap-4 px-5 py-3.5"
                 style={{
                   borderTop:
                     i === 0 ? 'none' : '1px solid #f1f5f9',
@@ -384,7 +384,7 @@ export default function UsersPage() {
                   {initials(u)}
                 </div>
 
-                <div className="min-w-0 flex-1">
+                <div className="users-user-info min-w-0 flex-1">
                   <p
                     className="text-sm font-semibold truncate"
                     style={{
@@ -417,7 +417,7 @@ export default function UsersPage() {
                     )
                   }
                   disabled={u.id === currentUser?.id}
-                  className="text-xs font-medium px-2.5 py-1.5 rounded-lg bg-white shrink-0"
+                  className="users-role-select text-xs font-medium px-2.5 py-1.5 rounded-lg bg-white shrink-0"
                   style={{
                     border: '1.5px solid #e2e8f0',
                     color: '#1d4ed8',
@@ -433,7 +433,7 @@ export default function UsersPage() {
                 <button
                   onClick={() => handleToggleActive(u)}
                   disabled={u.id === currentUser?.id}
-                  className="text-xs font-medium px-2.5 py-1.5 rounded-lg shrink-0 transition-all"
+                  className="users-toggle-button text-xs font-medium px-2.5 py-1.5 rounded-lg shrink-0 transition-all"
                   style={{
                     border: '1.5px solid #e2e8f0',
                     color: '#374151',
@@ -445,7 +445,7 @@ export default function UsersPage() {
                 <button
                   onClick={() => handleDelete(u)}
                   disabled={u.id === currentUser?.id}
-                  className="w-8 h-8 flex items-center justify-center rounded-lg shrink-0 transition-all disabled:opacity-30"
+                  className="users-delete-button w-8 h-8 flex items-center justify-center rounded-lg shrink-0 transition-all disabled:opacity-30"
                   style={{
                     border: '1.5px solid #fecaca',
                     color: '#ef4444',
@@ -480,6 +480,9 @@ export default function UsersPage() {
           {users.length}
         </p>
       </div>
+    </div>
+  );
+}
     </div>
   );
 }
