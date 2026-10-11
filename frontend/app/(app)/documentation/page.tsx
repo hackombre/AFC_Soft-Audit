@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { api } from '@/lib/api';
+import { api, getToken } from '@/lib/api';
 import { useMission } from '@/lib/mission-context';
 import type { DocumentItem, QuestionnaireNode, QuestionnaireStructure } from '@/lib/types';
 import FolderTree from '@/components/documents/FolderTree';
@@ -173,8 +173,9 @@ export default function DocumentationPage() {
   }
 
   async function handleDownload(doc: DocumentItem) {
+    const token = getToken();
     const res = await fetch(api.documentDownloadUrl(doc.id), {
-      credentials: 'same-origin',
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
     });
     if (!res.ok) return;
     const blob = await res.blob();
@@ -219,9 +220,9 @@ export default function DocumentationPage() {
     : structure.sections;
 
   return (
-    <div className="flex flex-1 overflow-hidden" style={{ background: '#fafbfd' }}>
+    <div className="afc-documentation-layout flex flex-1 overflow-hidden" style={{ background: '#fafbfd' }}>
       {/* Folder tree */}
-      <div className="flex flex-col shrink-0" style={{ width: '300px', background: 'white', borderRight: '1px solid #eef2f7' }}>
+      <div className="afc-documentation-sidebar flex flex-col shrink-0" style={{ width: '300px', background: 'white', borderRight: '1px solid #eef2f7' }}>
         <div className="px-4 pt-3.5 pb-3" style={{ borderBottom: '1px solid #eef2f7' }}>
           <div className="flex items-center gap-2 mb-1">
             <button
