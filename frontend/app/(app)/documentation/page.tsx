@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { api, getToken } from '@/lib/api';
+import { api } from '@/lib/api';
 import { useMission } from '@/lib/mission-context';
 import type { DocumentItem, QuestionnaireNode, QuestionnaireStructure } from '@/lib/types';
 import FolderTree from '@/components/documents/FolderTree';
@@ -173,17 +173,21 @@ export default function DocumentationPage() {
   }
 
   async function handleDownload(doc: DocumentItem) {
-    const token = getToken();
     const res = await fetch(api.documentDownloadUrl(doc.id), {
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      credentials: 'same-origin',
     });
-    if (!res.ok) return;
+    if (!res.ok) {
+      window.alert('Impossible de télécharger le document.');
+      return;
+    }
     const blob = await res.blob();
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
     a.download = doc.filename;
+    document.body.appendChild(a);
     a.click();
+    a.remove();
     URL.revokeObjectURL(url);
   }
 
@@ -413,3 +417,4 @@ export default function DocumentationPage() {
     </div>
   );
 }
+
